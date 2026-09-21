@@ -14,16 +14,9 @@ python3 love2d/run.py
 `python3 -m fighter` is the Grok loop + tools + HTTP pad API.
 `love2d/run.py` is the LÖVE pad talking to that API.
 
-Browser pad (same agent):
-
-```bash
-python3 raid_demo.py
-python3 examples/sky_raider.py
-```
-
 Enter sends to Grok. Thinking streams into the box. Tools: read, write, edit, bash.
 
-If you are not logged in, type `login` / Ctrl+L (LÖVE) or click **login** (browser).
+If you are not logged in, type `login` / Ctrl+L. Custom agent example: `python3 examples/sky_raider.py`.
 
 Record a live coding turn (`docs/demo.mp4`, workspace `/tmp/demo`):
 

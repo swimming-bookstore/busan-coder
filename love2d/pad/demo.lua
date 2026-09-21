@@ -480,10 +480,6 @@ function Demo:pin_last_file()
   self.file_hold = 8.5
 end
 
-function Demo:nudge_shell_scroll()
-  self:nudge_code_scroll()
-end
-
 function Demo:apply_code_line(text)
   if self.editAt ~= nil then
     if not self.editSpliced then

@@ -197,7 +197,7 @@ def make_handler(rt: Runtime) -> type[BaseHTTPRequestHandler]:
 
         def do_GET(self) -> None:
             path = self.path.split("?", 1)[0]
-            if path in ("/", "/index.html", "/raid_demo.html", "/pad.html"):
+            if path in ("/", "/index.html", "/pad.html"):
                 self._send(200, rt.html_bytes(), "text/html; charset=utf-8")
                 return
             if path == "/api/status":
