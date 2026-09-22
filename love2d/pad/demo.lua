@@ -35,7 +35,6 @@ function Demo:reset()
   self.think_lift = 0
   self.think_hold = 0
   self.think_a = 0
-  self.think_roll = 0
   self.thinking = ""
   self.thinkEmitted = 0
   self.think_fill = 0
@@ -79,7 +78,6 @@ function Demo:reset()
   self.codeKey = ""
   self.codeGap = 0
   self.code_lift = 0
-  self.shell_lift = 0
   self.live = false
   self.editAt = nil
   self.editOldCount = 0
@@ -767,14 +765,12 @@ function Demo:clear_live()
   self.think_lift = 0
   self.think_hold = 0
   self.think_a = 0
-  self.think_roll = 0
   self.trail = {}
   self.codeQ = {}
   self.codeShots = {}
   self.codeBusy = false
   self.codeKey = ""
   self.code_lift = 0
-  self.shell_lift = 0
   self.shell = {}
   self.shellCmd = ""
   self.shellQ = {}
@@ -856,8 +852,6 @@ function Demo:update(dt)
   self:step_shell(dt)
   self.code_lift = (self.code_lift or 0) * math.exp(-9 * dt)
   if (self.code_lift or 0) < 0.4 then self.code_lift = 0 end
-  self.shell_lift = (self.shell_lift or 0) * math.exp(-9 * dt)
-  if (self.shell_lift or 0) < 0.4 then self.shell_lift = 0 end
   self.thinkGap = math.max(0, (self.thinkGap or 0) - dt)
   self:fire_next_thought()
   self.think_lift = self.think_lift + (0 - self.think_lift) * (1 - math.exp(-9 * dt))
@@ -970,10 +964,8 @@ function Demo:update(dt)
   end
   local want = (busy or self.think_hold > 0) and 1 or 0
   self.think_a = (self.think_a or 0) + (want - (self.think_a or 0)) * (1 - math.exp(-7 * dt))
-  self.think_roll = self.think_a
   if self.think_a < 0.02 and want == 0 and not self.working then
     self.think_a = 0
-    self.think_roll = 0
     self.thinking = ""
     self.think_board = {}
   end

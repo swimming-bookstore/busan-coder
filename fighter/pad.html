@@ -7,18 +7,9 @@
 <style>
   :root {
     --void: #083054;
-    --navy: #0c4870;
-    --well: #061c30;
-    --ink: #20140c;
     --cream: #fcecc8;
     --coin: #f8d030;
     --cyan: #50d8f8;
-    --pink: #f878a8;
-    --dim: #847464;
-    --panel: #f8d088;
-    --gutter: #0a2c44;
-    --grass: #48c858;
-    --brick: #d85418;
     --glass: rgba(8, 48, 84, 0.78);
   }
   .glass {
@@ -113,34 +104,12 @@
 </div>
 <script>
 const W = 1280, H = 720;
-const VOID = [8,48,84], NAVY = [12,72,112], INK = [32,20,12], WELL = [6,28,48];
+const NAVY = [12,72,112], INK = [32,20,12], WELL = [6,28,48];
 const GUTTER = [10,44,68], CREAM = [252,236,200], COIN = [248,208,48], CYAN = [80,216,248];
-const PINK = [248,120,168], GRASS = [72,200,88], BRICK = [216,84,24], PANEL = [248,208,136];
+const PINK = [248,120,168], GRASS = [72,200,88], BRICK = [216,84,24];
 const DIM = [132,116,100], WHITE = [255,255,255];
 const SKY = { RUST:[248,152,56], GO:[80,216,248], CPP:[120,168,248], PY:[248,208,56] };
 
-const LANDS = [
-  { file:"main.rs", lang:"RUST", sky:SKY.RUST,
-    empty:["fn main() {","}",""],
-    hello:["fn main() {",'    println!("hello, world");',"}"],
-    think:"empty main read write hello world",
-    talk:"Empty main is on the pad. I will write hello, world in Rust." },
-  { file:"main.go", lang:"GO", sky:SKY.GO,
-    empty:["package main","","func main() {","}",""],
-    hello:["package main","","import \"fmt\"","","func main() {",'    fmt.Println("hello, world")',"}"],
-    think:"package import fmt print hello",
-    talk:"Go needs the fmt import. Then Println into main." },
-  { file:"main.cpp", lang:"C++", sky:SKY.CPP,
-    empty:["int main() {","    return 0;","}",""],
-    hello:["#include <iostream>","","int main() {",'    std::cout << "hello, world\\n";',"    return 0;","}"],
-    think:"include iostream cout hello world",
-    talk:"Include iostream, then cout the line, keep return 0." },
-  { file:"main.py", lang:"PYTHON", sky:SKY.PY,
-    empty:["def main():","    pass",""],
-    hello:["def main():",'    print("hello, world")',"","if __name__ == '__main__':","    main()"],
-    think:"def pass print name main",
-    talk:"Drop pass, print hello, then call main." },
-];
 
 const canvas = document.getElementById("stage");
 const ctx = canvas.getContext("2d");
@@ -225,17 +194,6 @@ const demo = {
   linger:0, launch:0,
 };
 
-function enterLand(i){
-  const land=LANDS[i%LANDS.length];
-  demo.landI=i%LANDS.length; demo.file=land.file; demo.lang=land.lang;
-  demo.code=land.empty.slice(); demo.sky=land.sky; demo.skyA=1;
-  demo.caption="";
-  demo.caret=Math.min(1,Math.max(0,demo.code.length-2));
-  demo.thinking=""; demo.thinkShow=false; demo.thinkA=0; demo.thinkHold=0; demo.talks=[]; demo.talkI=0;
-  demo.thoughts=[]; demo.thinkFired=0; demo.thinkQ=[]; demo.thinkBusy=false; demo.thinkBoard=[]; demo.thinkLift=0;
-  demo.codeQ=[]; demo.codeShots=[]; demo.codeBusy=false; demo.codeKey="";
-  demo.editAt=null; demo.editOldCount=0; demo.editSpliced=false; demo.editInsert=null; demo.editDelay=0;
-}
 function tint(line,i){
   if (demo.tool==="BASH" || demo.lang==="SH"){
     if (/^\$ /.test(line)) return COIN;
@@ -294,12 +252,6 @@ function padCols(){
   return Math.max(12, Math.floor(((bw||1136)-80-16)/16));
 }
 
-function ungutter(text){
-  return (text||"").split("\n").map(l=>{
-    const m=l.match(/^\s*\d+\t(.*)$/);
-    return m?m[1]:l;
-  }).join("\n");
-}
 function setPadFile(path, tool){
   const p=path||demo.file||"file";
   demo.file = p.split(/[\\/]/).pop() || p;
@@ -494,9 +446,6 @@ function stepCode(dt){
   }
   demo.codeShots=demo.codeShots.filter(sh=>sh.form<1);
   demo.codeBusy=demo.codeShots.length>0 || demo.codeQ.length>0;
-}
-function thinkCols(){
-  return 22;
 }
 function thinkBullets(text){
   const words=(text||"").replace(/\s+/g," ").trim().split(" ").filter(Boolean);
@@ -844,7 +793,6 @@ function setWorking(on){
 function paintBar(){
   document.getElementById("bar").textContent="__FIGHTER_NAME__";
 }
-function setUsage(){}
 
 async function abortTurn(){ await fetch("/api/abort",{method:"POST"}); }
 
@@ -906,9 +854,6 @@ async function sendTurn(text){
           }
           if (v.detail) setTalk(name.toUpperCase()||"TOOL", `${v.is_error?"error":"ok"}  ${v.path||v.cmd||""}`.trim());
         }
-        else if (event==="usage"){
-          setUsage(v);
-        }
         else if (event==="error") setTalk("error", v.text||"error");
         else if (event==="end"){ if (v.text && !agent){ setTalk("__FIGHTER_CALLSIGN__", v.text); } }
       }
@@ -917,7 +862,6 @@ async function sendTurn(text){
   if (!alive()) return;
   flushThink(true);
   setWorking(false); demo.caption=""; composer.focus();
-  if (RECORD) setTimeout(()=>fetch("/api/record-done",{method:"POST"}).catch(()=>{}), 4200);
 }
 
 window.addEventListener("keydown", e=>{
@@ -947,33 +891,8 @@ composer.addEventListener("keydown", e=>{
 });
 newBtn.addEventListener("click", newChat);
 
-const qs=new URLSearchParams(location.search);
-const RECORD=qs.has("record");
-let lastPost=0, posting=false;
-
-function postFrame(){
-  if (posting) return;
-  posting=true;
-  canvas.toBlob(blob=>{
-    if (!blob){ posting=false; return; }
-    fetch("/api/frame",{method:"POST",body:blob}).finally(()=>{ posting=false; });
-  }, "image/png");
-}
-
-const _loop=loop;
-loop=function(now){
-  const dt=Math.min(0.05,(now-last)/1000); last=now;
-  ctx.setTransform(1,0,0,1,0,0); ctx.clearRect(0,0,W,H);
-  draw(dt);
-  if (RECORD && now-lastPost>=1000/30){ lastPost=now; postFrame(); }
-  requestAnimationFrame(loop);
-};
-
 requestAnimationFrame(loop);
 composer.focus();
-if (RECORD){
-  setTimeout(()=>sendTurn("__FIGHTER_RECORD_PROMPT__"), 900);
-}
 </script>
 </body>
 </html>
