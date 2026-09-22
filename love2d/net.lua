@@ -74,7 +74,7 @@ local function status_code(head)
 end
 
 local function request(method, path, body, stream_fn)
-  local sock, err = connect(stream_fn and 8 or 8)
+  local sock, err = connect(8)
   if not sock then return nil, err end
   body = body or ""
   local req = table.concat({

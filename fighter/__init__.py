@@ -14,17 +14,15 @@ LÖVE pad (same HTTP API):
     python3 love2d/run.py
 """
 from fighter.agent import Agent, AgentConfig
-from fighter.server import RECORD_DONE, make_httpd, serve, set_record_queue
+from fighter.server import make_httpd, serve
 from fighter.tools import Tool, builtin_tools, tool
 
 __all__ = [
     "Agent",
     "AgentConfig",
-    "RECORD_DONE",
     "Tool",
     "builtin_tools",
     "make_httpd",
     "serve",
-    "set_record_queue",
     "tool",
 ]

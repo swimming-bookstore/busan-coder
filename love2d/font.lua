@@ -103,4 +103,4 @@ local function glyph(ch)
   return FONT[ch] or FONT[string.upper(ch)] or FONT[' ']
 end
 
-return { FONT = FONT, glyph = glyph }
+return { glyph = glyph }

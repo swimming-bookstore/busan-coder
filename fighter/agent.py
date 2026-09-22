@@ -27,7 +27,6 @@ class AgentConfig:
     host: str = "127.0.0.1"
     port: int = 8765
     open_browser: bool = True
-    record_prompt: str = "fix the tests in demo/"
 
 
 class Agent:

@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import json
-import queue
 import sys
 import threading
 import time
@@ -15,15 +14,6 @@ from fighter.auth import AuthStore, XAI_CLIENT_ID, XAI_DEVICE_URL, XAI_SCOPE, XA
 from fighter.grok import grok_complete
 from fighter.httpjson import http_json
 from fighter.tools import tool_path
-
-RECORD_Q: queue.Queue[bytes] | None = None
-RECORD_DONE = threading.Event()
-
-
-def set_record_queue(q: queue.Queue[bytes] | None) -> None:
-    global RECORD_Q
-    RECORD_Q = q
-    RECORD_DONE.clear()
 
 
 def sse_write(handler: BaseHTTPRequestHandler, event: str, data: Any) -> None:
@@ -54,7 +44,6 @@ class Runtime:
         raw = cfg.html.read_text(encoding="utf-8")
         raw = raw.replace("__FIGHTER_NAME__", json.dumps(cfg.name)[1:-1])
         raw = raw.replace("__FIGHTER_CALLSIGN__", json.dumps(cfg.callsign)[1:-1])
-        raw = raw.replace("__FIGHTER_RECORD_PROMPT__", json.dumps(cfg.record_prompt)[1:-1])
         return raw.encode("utf-8")
 
     def agent_turn(self, handler: BaseHTTPRequestHandler, text: str) -> None:
@@ -169,10 +158,7 @@ class Runtime:
 def make_handler(rt: Runtime) -> type[BaseHTTPRequestHandler]:
     class Handler(BaseHTTPRequestHandler):
         def log_message(self, fmt: str, *args: Any) -> None:
-            msg = fmt % args
-            if "/api/frame" in msg:
-                return
-            sys.stderr.write("%s - %s\n" % (self.address_string(), msg))
+            sys.stderr.write("%s - %s\n" % (self.address_string(), fmt % args))
 
         def _send(self, code: int, body: bytes, ctype: str) -> None:
             self.send_response(code)
@@ -221,17 +207,6 @@ def make_handler(rt: Runtime) -> type[BaseHTTPRequestHandler]:
 
         def do_POST(self) -> None:
             path = self.path.split("?", 1)[0]
-            if path == "/api/frame":
-                n = int(self.headers.get("Content-Length") or 0)
-                data = self.rfile.read(n) if n else b""
-                if RECORD_Q is not None:
-                    RECORD_Q.put(data)
-                self._send(200, b"ok", "text/plain")
-                return
-            if path == "/api/record-done":
-                RECORD_DONE.set()
-                self._send(200, b"ok", "text/plain")
-                return
             if path == "/api/abort":
                 rt.abort.set()
                 self._json(200, {"ok": True})
